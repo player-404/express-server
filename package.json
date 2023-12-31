@@ -1,0 +1,34 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "NODE_ENV=development nodemon server",
+    "prd": "NODE_ENV=production nodemon server"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "install": "^0.13.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.6.3",
+    "morgan": "^1.10.0",
+    "npm": "^10.2.4"
+  },
+  "devDependencies": {
+    "eslint": "^8.52.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-react": "^7.33.2",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.3"
+  }
+}

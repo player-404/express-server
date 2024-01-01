@@ -42,3 +42,9 @@ exports.restrictTo =
 
     next();
   };
+
+// 忘记密码
+exports.fotgetPassword = catchAsyncError(() => {});
+
+// 重置密码
+exports.resetPassword = catchAsyncError(() => {});

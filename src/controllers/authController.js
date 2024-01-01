@@ -3,6 +3,7 @@ const User = require('../model/userModel');
 const { AppError } = require('../utils/errorHandle');
 const { createJWT } = require('../utils/userUtils');
 
+// 用户登录
 const signInAccount = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) return next(new AppError(404, '请检查你的数据！'));

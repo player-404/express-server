@@ -4,7 +4,7 @@ const { catchAsyncError } = require('../utils/errorHandle');
 const { AppError } = require('../utils/errorHandle');
 const User = require('../model/userModel');
 
-//路由保护，阻止未登录的用户
+//路由保护，阻止未登录的用户（登录状态验证）
 exports.project = catchAsyncError(async (req, res, next) => {
   // 1. 获取token
   const token =

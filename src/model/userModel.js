@@ -69,6 +69,7 @@ userSchema.methods.verifyToken = function (tokenIat) {
   if (!this.passwordChangeAt) return false;
   // token 创建日期为秒
   const passwordChangeTime = new Date(this.passwordChangeAt).getTime() / 1000;
+  // token 签发时间比密码修改时间早，则该token过期
   return tokenIat < passwordChangeTime;
 };
 

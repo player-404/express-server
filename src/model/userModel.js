@@ -57,6 +57,12 @@ const userSchema = new Schema({
   passwordChangeAt: {
     type: Date,
   },
+  // 权限
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
+  },
 });
 
 //登录密码验证 (methods 向实例中添加方法)

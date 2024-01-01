@@ -22,5 +22,23 @@ exports.project = catchAsyncError(async (req, res, next) => {
   const tokenStatus = user.verifyToken(payload.iat);
   if (tokenStatus) return next(new AppError(401, '用户身份已过期，请重新登录'));
 
+  // 将 user 数据赋值给 req
+  req.user = user;
+
   next();
 });
+
+// 用户权限
+exports.restrictTo =
+  (...roles) =>
+  (req, res, next) => {
+    // roles：需求权限  req.user.role 用户实际权限
+    // req.user.role 在路由保护中间键中赋值，判断用户权限的前提是用户需要登录
+
+    // 用户权限不在需求权限中：权限不足
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError(403, '权限不足，不能操作'));
+    }
+
+    next();
+  };

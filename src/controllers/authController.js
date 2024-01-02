@@ -22,6 +22,22 @@ const signInAccount = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// 忘记密码
+exports.forgetPassword = catchAsyncError(async (req, res, next) => {
+  const { email } = req.body;
+  // 检查用户是否输入邮箱
+  if (!email) return next(new AppError(404, '请输入邮箱！'));
+  // 查询用户
+  const user = await User.findOne({ email });
+  // 邮箱是否存在
+  if (!user) return next(new AppError(404, '邮箱不存在！'));
+  //  创建 reset token
+  const restToken = user.createRestToken();
+  // 保存数据时关闭检查
+  User.save({ validateBeforeSave: false });
+  // 发送重置邮件
+});
+
 module.exports = {
   signInAccount,
 };

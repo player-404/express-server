@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 require('jsonwebtoken');
 
 const { Schema } = mongoose;
@@ -63,6 +64,28 @@ const userSchema = new Schema({
     enum: ['user', 'admin'],
     default: 'user',
   },
+  // 密码重置token
+  resetPassToken: {
+    type: String,
+  },
+  // 重置 token 过期时间
+  resetTokenExpire: {
+    type: Date,
+  },
+});
+
+// 密码加密
+userSchema.pre('save', async function (next) {
+  // 密码修改后，密码加密
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  this.passwordConfirm = undefined;
+  next();
+});
+
+// 密码修改日期
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password')) return next();
 });
 
 //登录密码验证 (methods 向实例中添加方法)
@@ -89,6 +112,18 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+// 生成密码重置链接与过期时间并保存到数据库中
+userSchema.methods.creteResetToken = function () {
+  // 生成随机十六进制字符串
+  const data = crypto.randomBytes(32).toString('hex');
+  // 加密随机字符串并返回
+  this.resetPassToken = crypto.createHash('sha256').update(data).digest('hex');
+  // 重置token过期时间设置未十分钟
+  this.resetPassExpire = Date.now() + 10 * 60 * 1000;
+
+  return this.resetPassToken;
+};
 
 // eslint-disable-next-line new-cap
 const User = mongoose.model('User', userSchema);

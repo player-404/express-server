@@ -44,7 +44,12 @@ exports.restrictTo =
   };
 
 // 忘记密码
-exports.fotgetPassword = catchAsyncError(() => {});
+exports.fotgetPassword = catchAsyncError(() => {
+  // 1. 生成随机token
+  // 2. 发送邮件
+  // 3. 更新数据库
+  // 4. 返回响应
+});
 
 // 重置密码
 exports.resetPassword = catchAsyncError(() => {});

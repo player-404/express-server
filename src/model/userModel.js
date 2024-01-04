@@ -114,13 +114,13 @@ userSchema.pre('save', async function (next) {
 });
 
 // 生成密码重置链接与过期时间并保存到数据库中
-userSchema.methods.creteResetToken = function () {
+userSchema.methods.createResetToken = function () {
   // 生成随机十六进制字符串
   const data = crypto.randomBytes(32).toString('hex');
   // 加密随机字符串并返回
   this.resetPassToken = crypto.createHash('sha256').update(data).digest('hex');
   // 重置token过期时间设置未十分钟
-  this.resetPassExpire = Date.now() + 10 * 60 * 1000;
+  this.resetTokenExpire = Date.now() + 10 * 60 * 1000;
 
   return this.resetPassToken;
 };

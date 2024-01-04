@@ -2,6 +2,7 @@ const { catchAsyncError } = require('../utils/errorHandle');
 const User = require('../model/userModel');
 const { AppError } = require('../utils/errorHandle');
 const { createJWT } = require('../utils/userUtils');
+const { sendMail } = require('../utils/emal');
 
 // 用户登录
 const signInAccount = catchAsyncError(async (req, res, next) => {
@@ -32,11 +33,26 @@ const forgetPassword = catchAsyncError(async (req, res, next) => {
   // 邮箱是否存在
   if (!user) return next(new AppError(404, '邮箱不存在！'));
   //  创建 reset token
-  const restToken = user.createResetToken();
-  // 保存数据时关闭检查
+  user.createResetToken();
+  // 保存数据(关闭检查)
   await user.save({ validateBeforeSave: false });
   // 发送重置邮件
-  console.log('token', restToken);
+  try {
+    await sendMail({
+      to: '1315363446@qq.com',
+      subject: '重置密码',
+      text: `点击链接重置密码: http://${req.host}${req.originalUrl}/${user.resetPassToken}`,
+    });
+    res.status(200).json({
+      msg: '邮件发送成功',
+    });
+  } catch (err) {
+    console.log('err', err);
+    res.status(500).json({
+      msg: '邮件发送失败',
+      err,
+    });
+  }
 });
 
 module.exports = {

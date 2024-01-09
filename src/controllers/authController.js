@@ -65,7 +65,7 @@ const resetPassword = catchAsyncError(async (req, res, next) => {
   // 查询用户
   const user = await User.findOne({
     resetPassToken: hashedToken,
-    resetTokenExpire: { $get: Date.now() },
+    resetTokenExpire: { $gt: Date.now() },
   });
   // token错误
   if (!user) return new AppError(400, '重置密码链接错误或过期');
@@ -74,6 +74,10 @@ const resetPassword = catchAsyncError(async (req, res, next) => {
   user.passwordConfirm = req.body.passwordConfirm;
   // 保存数据到数据库
   await user.save();
+  // 返回数据
+  res.status(200).json({
+    msg: '密码重置成功',
+  });
 });
 
 module.exports = {

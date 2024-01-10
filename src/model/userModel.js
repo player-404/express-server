@@ -70,7 +70,7 @@ const userSchema = new Schema({
   },
   // 重置 token 过期时间
   resetTokenExpire: {
-    type: Date,
+    type: Number,
   },
 });
 
@@ -83,9 +83,14 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// 密码修改日期
+// 自动存储修改密码时间
 userSchema.pre('save', function (next) {
-  if (!this.isModified('password')) return next();
+  // 新建文档或者密码没有修改则不存储密码修改时间
+  if (!this.isModified('password') || this.isNew) return next();
+  // 存储密码修改时间
+  this.passwordChangeAt = Date.now() + 1000; // 生成token的时间可能会慢一点，因此修改密码的时间也要调慢一点 ?
+
+  next();
 });
 
 //登录密码验证 (methods 向实例中添加方法)
@@ -102,17 +107,6 @@ userSchema.methods.verifyToken = function (tokenIat) {
   return tokenIat < passwordChangeTime;
 };
 
-// 确认密码不必存在数据库中，注册密码加密
-userSchema.pre('save', async function (next) {
-  // 判断 password 是否修改，修改密码则要对新密码重新加密
-  if (!this.isModified('password')) return next();
-  // 密码加密
-  this.password = await bcrypt.hash(this.password, 12);
-  // 不存储确认密码
-  this.passwordConfirm = undefined;
-  next();
-});
-
 // 生成密码重置链接与过期时间并保存到数据库中
 userSchema.methods.createResetToken = function () {
   // 生成随机十六进制字符串
@@ -122,18 +116,10 @@ userSchema.methods.createResetToken = function () {
   // 重置token过期时间设置未十分钟
   this.resetTokenExpire = Date.now() + 10 * 60 * 1000;
 
+  // console.log('原始token', data);
+  // console.log('加密token', this.resetPassToken);
   return data;
 };
-
-// 自动存储修改密码时间
-userSchema.pre('save', (req, res, next) => {
-  // 新建文档或者密码没有修改则不存储密码修改时间
-  if (!this.isModified('password') || this.isNew) return next();
-  // 存储密码修改时间
-  this.passwordChangeAt = Date.now() + 1000; // 生成token的时间可能会慢一点，因此修改密码的时间也要调慢一点 ?
-
-  next();
-});
 
 // eslint-disable-next-line new-cap
 const User = mongoose.model('User', userSchema);

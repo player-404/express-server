@@ -1,4 +1,4 @@
-const crypto = require('node:crypto');
+const crypto = require('crypto');
 const { catchAsyncError } = require('../utils/errorHandle');
 const User = require('../model/userModel');
 const { AppError } = require('../utils/errorHandle');
@@ -35,14 +35,16 @@ const forgetPassword = catchAsyncError(async (req, res, next) => {
   if (!user) return next(new AppError(404, '邮箱不存在！'));
   //  创建 reset token
   const token = await user.createResetToken();
+
   // 保存数据(关闭检查)
   await user.save({ validateBeforeSave: false });
+  console.log('加密tt', user);
   // 发送重置邮件
   try {
     await sendMail({
       to: '1315363446@qq.com',
       subject: '重置密码',
-      text: `点击链接重置密码: http://${req.host}${req.originalUrl}/${token}`,
+      text: `点击链接重置密码: http://${req.host}/resetPassword/${token}`, // 端口？
     });
     res.status(200).json({
       msg: '邮件发送成功',
@@ -60,19 +62,26 @@ const forgetPassword = catchAsyncError(async (req, res, next) => {
 const resetPassword = catchAsyncError(async (req, res, next) => {
   // 获得原始密码重置 token
   const { token } = req.params;
+  if (!token) return new AppError(400, '链接错误');
   // 加密 原始token 因为数据库中存储的是加密的token
   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
   // 查询用户
   const user = await User.findOne({
     resetPassToken: hashedToken,
-    resetTokenExpire: { $gt: Date.now() },
+    resetTokenExpire: { $gte: Date.now() },
   });
+  console.log('user', user);
   // token错误
-  if (!user) return new AppError(400, '重置密码链接错误或过期');
+  if (!user) {
+    return next(new AppError(400, '重置密码链接错误或过期'));
+  }
   //重置密码
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
-  // 保存数据到数据库
+  user.resetPassToken = undefined;
+  user.resetTokenExpire = undefined;
+
+  // 保存数据
   await user.save();
   // 返回数据
   res.status(200).json({

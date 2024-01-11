@@ -38,7 +38,6 @@ const forgetPassword = catchAsyncError(async (req, res, next) => {
 
   // 保存数据(关闭检查)
   await user.save({ validateBeforeSave: false });
-  console.log('加密tt', user);
   // 发送重置邮件
   try {
     await sendMail({
@@ -70,7 +69,6 @@ const resetPassword = catchAsyncError(async (req, res, next) => {
     resetPassToken: hashedToken,
     resetTokenExpire: { $gte: Date.now() },
   });
-  console.log('user', user);
   // token错误
   if (!user) {
     return next(new AppError(400, '重置密码链接错误或过期'));
@@ -89,8 +87,27 @@ const resetPassword = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// 密码修改
+const changePassword = catchAsyncError(async (req, res, next) => {
+  // 1.验证当前密码
+  const user = await User.findById(req.user.id).select(+'password');
+  const { currentPassword } = req.body;
+  if (!user.verifyPassword(user.password, currentPassword))
+    return next(new AppError(400, '密码错误'));
+
+  // 2. 验证输入的密码
+  const { password, passwordConfirm } = req.body;
+  user.password = password;
+  user.passwordConfirm = passwordConfirm;
+  await user.save();
+  res.status(200).json({
+    msg: '密码修改成功',
+  });
+});
+
 module.exports = {
   signInAccount,
   forgetPassword,
   resetPassword,
+  changePassword,
 };

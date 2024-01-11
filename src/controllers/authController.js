@@ -90,11 +90,13 @@ const resetPassword = catchAsyncError(async (req, res, next) => {
 // 密码修改
 const changePassword = catchAsyncError(async (req, res, next) => {
   // 1.验证当前密码
-  const user = await User.findById(req.user.id).select(+'password');
+  const user = await User.findById(req.user.id).select('+password');
   const { currentPassword } = req.body;
-  if (!user.verifyPassword(user.password, currentPassword))
-    return next(new AppError(400, '密码错误'));
-
+  const verifyStatus = await user.verifyPassword(
+    user.password,
+    currentPassword,
+  );
+  if (!verifyStatus) return next(new AppError(400, '密码验证失败'));
   // 2. 验证输入的密码
   const { password, passwordConfirm } = req.body;
   user.password = password;

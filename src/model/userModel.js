@@ -89,7 +89,6 @@ userSchema.pre('save', function (next) {
   if (!this.isModified('password') || this.isNew) return next();
   // 存储密码修改时间
   this.passwordChangeAt = Date.now() + 1000; // 生成token的时间可能会慢一点，因此修改密码的时间也要调慢一点 ?
-
   next();
 });
 

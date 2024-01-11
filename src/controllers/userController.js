@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const User = require('../model/userModel');
-const { catchAsyncError } = require('../utils/errorHandle');
+const { catchAsyncError, AppError } = require('../utils/errorHandle');
 const userUtils = require('../utils/userUtils');
 
 // 用户注册
@@ -21,6 +21,37 @@ const signUp = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// 更新用户数据
+//过滤字段
+const filterBody = (current, ...allow) => {
+  const newObj = {};
+  Object.keys(current).forEach((key) => {
+    if (allow.includes(key)) {
+      newObj[key] = current[key];
+    }
+  });
+  return newObj;
+};
+
+const updateUser = catchAsyncError(async (req, res, next) => {
+  // 1.过滤字段 重要字段不能随意更改
+  if (JSON.stringify(req.body) === '{}')
+    return next(new AppError(400, '数据未更改！'));
+  const updateData = filterBody(req.body, 'name');
+  console.log('updateData', updateData);
+  // 2.更新数据
+  const user = await User.findByIdAndUpdate(req.user.id, updateData, {
+    new: true,
+  });
+  res.status(200).json({
+    msg: '数据更改成功',
+    data: {
+      user,
+    },
+  });
+});
+
 module.exports = {
   signUp,
+  updateUser,
 };

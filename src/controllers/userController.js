@@ -38,7 +38,6 @@ const updateUser = catchAsyncError(async (req, res, next) => {
   if (JSON.stringify(req.body) === '{}')
     return next(new AppError(400, '数据未更改！'));
   const updateData = filterBody(req.body, 'name');
-  console.log('updateData', updateData);
   // 2.更新数据
   const user = await User.findByIdAndUpdate(req.user.id, updateData, {
     new: true,
@@ -51,7 +50,19 @@ const updateUser = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// 删除用户
+const deleteUser = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  if (!user) return next(new AppError(400, '该用户不存在'));
+  user.active = false;
+  user.save({ validateBeforeSave: false });
+  res.status(201).json({
+    msg: '删除成功',
+  });
+});
+
 module.exports = {
   signUp,
   updateUser,
+  deleteUser,
 };

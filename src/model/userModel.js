@@ -72,6 +72,16 @@ const userSchema = new Schema({
   resetTokenExpire: {
     type: Number,
   },
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
+});
+// 查询中间键(过滤active为false的字段)
+userSchema.pre(/^find/i, function (next) {
+  this.find({ active: true });
+  next();
 });
 
 // 密码加密

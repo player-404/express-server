@@ -14,5 +14,7 @@ router.route('/resetPassword/:token').patch(authController.resetPassword);
 router.patch('/changePassword', project, authController.changePassword);
 //用户数据更新
 router.patch('/updateUser', project, userController.updateUser);
+// 删除用户
+router.delete('/deleteUser', project, userController.deleteUser);
 
 module.exports = router;

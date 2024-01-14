@@ -4,6 +4,7 @@ const User = require('../model/userModel');
 const { AppError } = require('../utils/errorHandle');
 const { createJWT } = require('../utils/userUtils');
 const { sendMail } = require('../utils/emal');
+const { createCookie } = require('../utils/userUtils');
 
 // 用户登录
 const signInAccount = catchAsyncError(async (req, res, next) => {
@@ -16,7 +17,8 @@ const signInAccount = catchAsyncError(async (req, res, next) => {
   if (!verifyStatus) return next(new AppError(500, '密码错误！！'));
   // 创建 token
   const token = createJWT(user._id);
-
+  // 创建 cookie
+  createCookie(res, token);
   res.status(200).json({
     status: 'success',
     msg: '登录成功',

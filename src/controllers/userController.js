@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const User = require('../model/userModel');
 const { catchAsyncError, AppError } = require('../utils/errorHandle');
-const userUtils = require('../utils/userUtils');
+const { createCookie, createJWT } = require('../utils/userUtils');
 
 // 用户注册
 const signUp = catchAsyncError(async (req, res, next) => {
@@ -12,7 +12,12 @@ const signUp = catchAsyncError(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
     phone: req.body.phone,
   });
-  const jwt = userUtils.createJWT(newUser._id);
+  // 创建 token
+  const jwt = createJWT(newUser._id);
+
+  // 创建 cookie
+  createCookie(res, jwt);
+
   res.status(200).json({
     msg: '用户创建成功',
     status: 'success',
@@ -42,6 +47,8 @@ const updateUser = catchAsyncError(async (req, res, next) => {
   const user = await User.findByIdAndUpdate(req.user.id, updateData, {
     new: true,
   });
+  // 创建cookie
+
   res.status(200).json({
     msg: '数据更改成功',
     data: {

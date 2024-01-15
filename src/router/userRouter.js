@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
-const { project } = require('../middleware/authMiddle');
+const { project, restrictTo } = require('../middleware/authMiddle');
 
 router.route('/').post(userController.signUp);
 
@@ -16,5 +16,14 @@ router.patch('/changePassword', project, authController.changePassword);
 router.patch('/updateUser', project, userController.updateUser);
 // 删除用户
 router.delete('/deleteUser', project, userController.deleteUser);
+// 获取所有用户数据
+router.get(
+  '/getAllUser',
+  project,
+  restrictTo('admin'),
+  userController.getAllUser,
+);
+// 获取指定用户数据
+router.get('/getUser/:id', userController.getUser);
 
 module.exports = router;

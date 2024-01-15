@@ -21,9 +21,9 @@ const limiter = rateLimit({
   limit: 100,
   messgae: '访问受限，请稍后重试！！',
 });
-
-app.use('/tour', limiter, tourRouter);
-app.use('/user', limiter, userRouter);
+app.use('/api', limiter);
+app.use('/api/tour', tourRouter);
+app.use('/api/user', userRouter);
 
 //404处理
 app.use('*', (req, res, next) => {

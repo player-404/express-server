@@ -68,8 +68,34 @@ const deleteUser = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// 获取所有用户数据
+const getAllUser = catchAsyncError(async (req, res, next) => {
+  const allUser = await User.find();
+  res.status(200).json({
+    msg: '数据获取成功',
+    data: {
+      users: allUser,
+    },
+  });
+});
+
+// 获取指定用户数据
+const getUser = catchAsyncError(async (req, res, next) => {
+  const userId = req.params.id;
+  const user = await User.findById(userId).select('-role -phone -email');
+  if (!user) return next(new AppError(404, '用户数据不存在'));
+  res.status(200).json({
+    msg: '数据获取成功',
+    data: {
+      user,
+    },
+  });
+});
+
 module.exports = {
   signUp,
   updateUser,
   deleteUser,
+  getAllUser,
+  getUser,
 };

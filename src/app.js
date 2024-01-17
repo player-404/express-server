@@ -2,14 +2,14 @@ const express = require('express');
 
 const app = express();
 const morgan = require('morgan');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const rateLimit = require('express-rate-limit');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const helmet = require('helmet');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const sanitizeHtml = require('sanitize-html');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const mongoSanitize = require('express-mongo-sanitize');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const hpp = require('hpp');
 const { tourRouter } = require('./router/tourRouter');
 const userRouter = require('./router/userRouter');
 const { AppError } = require('./utils/errorHandle');
@@ -35,6 +35,12 @@ const limiter = rateLimit({
   limit: 100,
   messgae: '访问受限，请稍后重试！！',
 });
+// 去除重复的请求参数，只取最后一个
+app.use(
+  hpp({
+    whitelist: ['duration', 'price', 'ratingQuantity', 'rating'],
+  }),
+);
 app.use(morgan('dev'));
 app.use('/api', limiter);
 app.use('/api/tour', tourRouter);

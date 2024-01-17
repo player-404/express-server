@@ -77,6 +77,10 @@ const userSchema = new Schema({
     default: true,
     select: false,
   },
+  // token 唯一标识
+  tokenId: {
+    type: String,
+  },
 });
 // 查询中间键(过滤active为false的字段)
 userSchema.pre(/^find/i, function (next) {

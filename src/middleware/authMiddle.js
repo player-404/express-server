@@ -13,14 +13,17 @@ exports.project = catchAsyncError(async (req, res, next) => {
 
   // 2. 验证token
   const payload = await promisify(jwt.verify)(token, process.env.SERCET);
-
   // 3.获取用户id 查询该用户是否存在
   const user = await User.findById(payload.id);
   if (!user) return next(new AppError(404, '非法凭证，请登录！'));
 
-  // 4.判断token是否过期，过期标准是密码是否更改
+  // 4.判断token是否过期，过期标准是密码是否更改（与下面的tokenId验证功能重复，其实可以删除这个判断）
   const tokenStatus = user.verifyToken(payload.iat);
   if (tokenStatus) return next(new AppError(401, '用户身份已过期，请重新登录'));
+  // 判断token ID是否一致
+  const { jti } = payload;
+  const { tokenId } = user;
+  if (jti !== tokenId) return next(new AppError(401, '身份过期！'));
 
   // 将 user 数据赋值给 req
   req.user = user;

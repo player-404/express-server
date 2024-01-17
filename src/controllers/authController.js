@@ -4,7 +4,7 @@ const User = require('../model/userModel');
 const { AppError } = require('../utils/errorHandle');
 const { createJWT } = require('../utils/userUtils');
 const { sendMail } = require('../utils/emal');
-const { createCookie } = require('../utils/userUtils');
+const { createCookie, deleteCookie } = require('../utils/userUtils');
 
 // 用户登录
 const signInAccount = catchAsyncError(async (req, res, next) => {
@@ -16,7 +16,8 @@ const signInAccount = catchAsyncError(async (req, res, next) => {
   const verifyStatus = await user.verifyPassword(user.password, password);
   if (!verifyStatus) return next(new AppError(500, '密码错误！！'));
   // 创建 token
-  const token = createJWT(user._id);
+  const token = await createJWT(user._id);
+
   // 创建 cookie
   createCookie(res, token);
   res.status(200).json({
@@ -104,8 +105,23 @@ const changePassword = catchAsyncError(async (req, res, next) => {
   user.password = password;
   user.passwordConfirm = passwordConfirm;
   await user.save();
+  deleteCookie(res);
   res.status(200).json({
     msg: '密码修改成功',
+  });
+});
+
+// 退出登录
+const loginOut = catchAsyncError(async (req, res, next) => {
+  // 清除 用户数据中 token Id 字段
+  await User.findByIdAndUpdate(req.user.id, {
+    tokenId: '',
+  });
+  // 清除cookie
+  deleteCookie(res);
+  // 返回状态
+  res.status(200).json({
+    msg: '退出登录成功',
   });
 });
 
@@ -114,4 +130,5 @@ module.exports = {
   forgetPassword,
   resetPassword,
   changePassword,
+  loginOut,
 };

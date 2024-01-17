@@ -25,5 +25,6 @@ router.get(
 );
 // 获取指定用户数据
 router.get('/getUser/:id', userController.getUser);
-
+// 退出登录
+router.post('/loginOut', project, authController.loginOut);
 module.exports = router;
